@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Event Streaming — WebSocket Test Client</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    h2 { margin-bottom: 0.25rem; }
+    .status { padding: 0.5rem 1rem; border-radius: 6px; margin: 1rem 0; }
+    .ok { background: #d1fae5; color: #065f46; }
+    .wait { background: #fef3c7; color: #92400e; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 8px; overflow-x: auto; min-height: 120px; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h2>🔔 Notification Test Client</h2>
+  <p>Gateway: <code id="gateway">http://localhost:3012</code> · User: <code>user_123</code></p>
+  <div id="status" class="status wait">Connecting...</div>
+  <pre id="log"></pre>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+    const logs = [];
+
+    function log(msg) {
+      const line = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logs.push(line);
+      logEl.textContent = logs.join('\n');
+      console.log(line);
+    }
+
+    const socket = io('http://localhost:3012');
+
+    socket.on('connect', () => {
+      statusEl.textContent = 'Connected — joined room user_123';
+      statusEl.className = 'status ok';
+      log('Connected: ' + socket.id);
+      socket.emit('join', { userId: 'user_123' });
+      log('Joined room: user_123');
+      log('Publish an event: curl -X POST http://localhost:3010/events/publish ...');
+    });
+
+    socket.on('notification', (data) => {
+      log('NOTIFICATION: ' + JSON.stringify(data));
+      socket.emit('ack', { eventId: data.eventId });
+      log('Ack sent for: ' + data.eventId);
+    });
+
+    socket.on('connect_error', (err) => {
+      statusEl.textContent = 'Connection failed — is gateway running on :3012?';
+      statusEl.className = 'status';
+      statusEl.style.background = '#fee2e2';
+      log('ERROR: ' + err.message);
+    });
+  </script>
+</body>
+</html>

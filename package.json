@@ -1,0 +1,18 @@
+{
+  "name": "event-streaming-engine",
+  "version": "1.0.0",
+  "description": "Real-time notification and event streaming engine — NestJS + Kafka + Redis + WebSockets",
+  "scripts": {
+    "start:all": "concurrently -n producer,consumer,gateway -c blue,green,magenta \"cd event-producer && npm run start:dev\" \"cd event-consumer && npm run start:dev\" \"cd notification-gateway && npm run start:dev\"",
+    "start:producer": "cd event-producer && npm run start:dev",
+    "start:consumer": "cd event-consumer && npm run start:dev",
+    "start:gateway": "cd notification-gateway && npm run start:dev",
+    "install:all": "npm install && cd event-producer && npm install && cd ../event-consumer && npm install && cd ../notification-gateway && npm install",
+    "build:all": "cd event-producer && npm run build && cd ../event-consumer && npm run build && cd ../notification-gateway && npm run build",
+    "test:ws": "node test-ws.js"
+  },
+  "dependencies": {
+    "concurrently": "^10.0.3",
+    "socket.io-client": "^4.8.3"
+  }
+}
